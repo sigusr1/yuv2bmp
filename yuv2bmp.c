@@ -56,48 +56,48 @@ typedef struct tagBITMAP_FILE{
 int main( int argc, char **argv)  
 {  
     int x;
-	int y;
+    int y;
     int index;
-	
+
     int width = 1920;
     int height = 1080;
 
-	unsigned char *src;
-	unsigned char *dst;
-	
-	FILE *fp;
-	
+    unsigned char *src;
+    unsigned char *dst;
+
+    FILE *fp;
+
     BITMAP_FILE bp_file;
 
     fp = fopen("test.yuv", "rb");
-	if (NULL == fp)
-	{
-		COMMON_LOG("%s", "file not exist");
-		return -1;
-	}
+    if (NULL == fp)
+    {
+        COMMON_LOG("%s", "file not exist");
+        return -1;
+    }
 
-	/* yuv 转换成1bpp的bmp，只需要y分量即可，
-	    对于4:2:0的yuv图片，只需要前width * height 个字节,
-	    转换后需要width * height / 8个字节来表示。
-	    由于例子中的yuv是1080p的，下面未考虑width的4字节对齐
-	*/
-	
+    /* yuv 转换成1bpp的bmp，只需要y分量即可，
+            对于4:2:0的yuv图片，只需要前width * height 个字节,
+            转换后需要width * height / 8个字节来表示。
+            由于例子中的yuv是1080p的，下面未考虑width的4字节对齐
+       */
+
     src = malloc(width * height);
-	if (NULL == src)
-	{
-		COMMON_LOG("malloc %d bytes fail.", width * height);
-		fclose(fp);
-		return -1;
-	}
-	
+    if (NULL == src)
+    {
+        COMMON_LOG("malloc %d bytes fail.", width * height);
+        fclose(fp);
+        return -1;
+    }
+
     dst = malloc(width * height / 8);
-	if (NULL == dst)
-	{
-		COMMON_LOG("malloc %d bytes fail.", width * height / 8);
-		free(src);
-		fclose(fp);
-		return -1;
-	}
+    if (NULL == dst)
+    {
+        COMMON_LOG("malloc %d bytes fail.", width * height / 8);
+        free(src);
+        fclose(fp);
+        return -1;
+    }
 
     memset(&bp_file, 0, sizeof(bp_file));
     
@@ -132,25 +132,25 @@ int main( int argc, char **argv)
     memset(dst, 0, (width * height / 8));
     
     index = 0;
-	/* 从左下角到右上角扫描*/
-	for(y=height - 1; y >= 0; y--) 
-	{
-		for(x=0; x < width; x++)  
-		{  
-		if (src[y*width+x] > 128)
-		{
-		    dst[index/8] |= (1 << (7 -(index % 8)));
-		}
-		index++;
-		}
-	}
+    /* 从左下角到右上角扫描*/
+    for(y=height - 1; y >= 0; y--) 
+    {
+        for(x=0; x < width; x++)  
+        {  
+            if (src[y*width+x] > 128)
+            {
+                dst[index/8] |= (1 << (7 -(index % 8)));
+            }
+            index++;
+        }
+    }
 
     fp = fopen("test.bmp", "wb");
     fwrite(&bp_file, sizeof(bp_file), 1, fp);
     fwrite(dst, (1920*1080/8), 1, fp);
     fclose(fp);
 
-	free(dst);
-	free(src);
+    free(dst);
+    free(src);
     return 0;  
 }  
